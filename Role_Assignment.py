@@ -287,19 +287,27 @@ def get_user_input():
     
     # Ask the user if they want to add new people
     while True:
-        while True:
-            choice = input(Fore.GREEN + "\nDo you want to add a new person to the list? (y/n): ").strip().lower()
-            if (yn_check(choice)): break
-            
-        if choice == "y":
-            name = input(Fore.YELLOW + "Enter the name: ").strip()
+        choice = input(Fore.GREEN + "\nDo you want to add(a) or delete(d) a person from the list or neither(n)? (a/d/n): ").strip().lower()
+
+        if choice == "a":
+            name = input(Fore.YELLOW + "Enter the adding name: ").strip()
             email = input(Fore.YELLOW + "Enter the email: ").strip()
             emails[name] = email
             save_emails_to_file('emails.txt', emails)
+            
+        elif choice == "d":
+            name = input(Fore.YELLOW + "Enter the deleting name: ").strip()
+            if name in emails:
+                del emails[name]
+                save_emails_to_file('emails.txt', emails)
+                print(Fore.GREEN + f"Name '{name}' deleted successfully!")
+            else:
+                print(Fore.RED + f"Name '{name}' not found!")
+                
         elif choice == "n":
             break
         else:
-            print(Fore.RED + "Invalid choice. Please answer with 'y' or 'n'.")
+            print(Fore.RED + "Invalid choice. Please answer with 'a', 'd', or 'n'.")
     
     # Ask for the number of people in group1 and group2
     while True:
