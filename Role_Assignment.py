@@ -1,5 +1,6 @@
 import smtplib
 import random
+import os
 from email.mime.text import MIMEText
 from colorama import init, Fore
 init(autoreset=True)
@@ -294,8 +295,11 @@ def get_user_input():
             name = input(Fore.YELLOW + "Enter the name: ").strip()
             email = input(Fore.YELLOW + "Enter the email: ").strip()
             emails[name] = email
-        else:
+            save_emails_to_file('emails.txt', emails)
+        elif choice == "n":
             break
+        else:
+            print(Fore.RED + "Invalid choice. Please answer with 'y' or 'n'.")
     
     # Ask for the number of people in group1 and group2
     while True:
@@ -393,7 +397,9 @@ def get_user_input():
             if (yn_check(unique_positions)): break
         unique = True if unique_positions == 'y' else False
 
+
     return group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions,
+
 
 def select_names_from_list(num_people, available_names):
     group = []
@@ -413,30 +419,71 @@ def select_names_from_list(num_people, available_names):
     
     return group
 
+def modify_positions_list(positions):
+    while True:
+        print(Fore.CYAN + "\nCurrent positions: " + ", ".join(positions))
+        print(Fore.YELLOW + "\nOptions:")
+        print("1. Add a position")
+        print("2. Remove a position")
+        print("3. Exit")
+        
+        choice = input(Fore.GREEN + "\nEnter your choice (1/2/3): ")
+        
+        if choice == "1":
+            new_position = input(Fore.YELLOW + "\nEnter the name of the position to add: ").strip()
+            if new_position in positions:
+                print(Fore.RED + f"Position '{new_position}' already exists!")
+            else:
+                positions.append(new_position)
+                print(Fore.GREEN + f"Position '{new_position}' added successfully!")
+                
+        elif choice == "2":
+            remove_position = input(Fore.YELLOW + "\nEnter the name of the position to remove: ").strip()
+            if remove_position not in positions:
+                print(Fore.RED + f"Position '{remove_position}' doesn't exist!")
+            else:
+                positions.remove(remove_position)
+                print(Fore.GREEN + f"Position '{remove_position}' removed successfully!")
+                
+        elif choice == "3":
+            break
+        else:
+            print(Fore.RED + "Invalid choice. Please select 1, 2, or 3.")
+    
+    return positions
+ 
 
 def create_roles_list(num_people, num_traitors):
     roles = ['traitor'] * num_traitors + ['good'] * (num_people - num_traitors)
     random.shuffle(roles)
     return roles
 
+def load_emails_from_file(filename):
+    emails = {}
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            for line in file.readlines():
+                name, email = line.strip().split(',')
+                emails[name] = email
+    else:
+        print(Fore.RED + f"'{filename}' does not exist. Starting with an empty email list.")
+    return emails
+
+def save_emails_to_file(filename, emails):
+    with open(filename, 'w') as file:
+        for name, email in emails.items():
+            file.write(f"{name},{email}\n")
+
+
 if __name__ == "__main__":
     # List of roles and email addresses, create two roles lists for more flexibility on num of players
     roles1 = ['traitor', 'good', 'good', 'good']
     roles2 = ['traitor', 'good', 'good', 'good'] 
     # add player's email
-    emails = {
-        'CJQ': 'chenjiaqiapply@gmail.com',
-        'DZY': '2456048353@qq.com',
-        'YYQ': 'yuqiao7@ualberta.ca',
-        'CJL': 'c1605716377@gmail.com',
-        'XWH': 'henryxu7108@gmail.com',
-        'ZDL': 'delongz1@uci.edu',
-        'LU': 'luqiyuan9@gmail.com',
-        'SAM': '1605446174@qq.com',
-        'ZJZ': 'junzhez01@gmail.com',
-        'XWHSB': 'XWHSB@rmalife.net',
-        'default': 'not_exist'
-    }
+    emails = load_emails_from_file('emails.txt')
+
+    # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
+    group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name = get_user_input()
     
     # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
     group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions = get_user_input()
@@ -466,5 +513,5 @@ if __name__ == "__main__":
         # functions, comment the unused one when calling
         send_roles(group1, group2, roles1, roles2, predetermined, traitor_email, favored_weight=10)
     server.quit()
-    # pyinstaller --onefile exe.py
+    # pyinstaller --onefile Role_Assignment.py
 
