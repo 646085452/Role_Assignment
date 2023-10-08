@@ -5,9 +5,8 @@ from colorama import init, Fore
 init(autoreset=True)
 
 # need to implement: 1. Improve the logic process of ensuring the designated traitor's name and must be first player in group.
-#                    2. Enable users to modify the position list.
-#                    3. Add corner case check for examine traitor names in which group of players, line 103 & 227
-#                    4. Add a csv or txt file to store email information
+#                    2. Add corner case check for examine traitor names in which group of players, line 103 & 227
+#                    3. Add a csv or txt file to store email information
 
 def weighted_shuffle_first(orig_list, favored_element, favored_weight, num):
     """
@@ -141,14 +140,14 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
         msg['Subject'] = 'Your Role Information: ' + roles1[i]
         
         # for testing purpose
-        # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
+        print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
         
         # comment following area only if testing
-        try:
-            server.sendmail(email_address, [group1[i]], msg.as_string())
-            print(f"Email sent to {group1[i]} successfully.")
-        except Exception as e:
-            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
+        # try:
+        #     server.sendmail(email_address, [group1[i]], msg.as_string())
+        #     print(f"Email sent to {group1[i]} successfully.")
+        # except Exception as e:
+        #     print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
             
     for i in range(len(group2)):
         # Use pos_group2 for group2
@@ -158,14 +157,14 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
         msg['Subject'] = 'Your Role Information: ' + roles2[i]
 
         # for testing purpose
-        # print(group2[i] + ': ' + roles2[i] + ", " + pos[i])
+        print(group2[i] + ': ' + roles2[i] + ", " + pos[i])
         
         # comment following area only if testing
-        try:
-            server.sendmail(email_address, [group2[i]], msg.as_string())
-            print(f"Email sent to {group2[i]} successfully.")
-        except Exception as e:
-            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+        # try:
+        #     server.sendmail(email_address, [group2[i]], msg.as_string())
+        #     print(f"Email sent to {group2[i]} successfully.")
+        # except Exception as e:
+        #     print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
             
 def send_roles(group1, group2, roles1, roles2,
                predetermined = False, traitor_email = 'not_exist', favored_weight = 10):
@@ -246,14 +245,14 @@ def send_roles(group1, group2, roles1, roles2,
         msg['Subject'] = 'Your Role Information: ' + roles1[i]
         
         # for testing purpose
-        # print(group1[i] + ': ' + roles1[i])
+        print(group1[i] + ': ' + roles1[i])
         
         # comment following area only if testing
-        try:
-            server.sendmail(email_address, [group1[i]], msg.as_string())
-            print(f"Email sent to {group1[i]} successfully.")
-        except Exception as e:
-            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
+        # try:
+        #     server.sendmail(email_address, [group1[i]], msg.as_string())
+        #     print(f"Email sent to {group1[i]} successfully.")
+        # except Exception as e:
+        #     print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
             
     for i in range(len(group2)):
         msg = MIMEText(f'Your role is: {roles2[i]}\n Roles are either \"traitor\" or \"good\".')
@@ -262,14 +261,21 @@ def send_roles(group1, group2, roles1, roles2,
         msg['Subject'] = 'Your Role Information: ' + roles2[i]
         
         # for testing purpose
-        # print(group2[i] + ': ' + roles2[i])
+        print(group2[i] + ': ' + roles2[i])
 
         # comment following area only if testing
-        try:
-            server.sendmail(email_address, [group2[i]], msg.as_string())
-            print(f"Email sent to {group2[i]} successfully.")
-        except Exception as e:
-            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+        # try:
+        #     server.sendmail(email_address, [group2[i]], msg.as_string())
+        #     print(f"Email sent to {group2[i]} successfully.")
+        # except Exception as e:
+        #     print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+
+def yn_check(input):
+    if input in ['y', 'n']:
+        return True
+    else:
+        print(Fore.RED + "Invalid input. Please enter y or n.")
+        return False
 
 def get_user_input():
     # Display the current list of names and emails
@@ -280,29 +286,53 @@ def get_user_input():
     
     # Ask the user if they want to add new people
     while True:
-        choice = input(Fore.GREEN + "\nDo you want to add a new person to the list? (y/n): ").strip().lower()
+        while True:
+            choice = input(Fore.GREEN + "\nDo you want to add a new person to the list? (y/n): ").strip().lower()
+            if (yn_check(choice)): break
+            
         if choice == "y":
             name = input(Fore.YELLOW + "Enter the name: ").strip()
             email = input(Fore.YELLOW + "Enter the email: ").strip()
             emails[name] = email
-        elif choice == "n":
-            break
         else:
-            print(Fore.RED + "Invalid choice. Please answer with 'y' or 'n'.")
+            break
     
     # Ask for the number of people in group1 and group2
-    num_group1 = int(input(Fore.YELLOW + "\nEnter the number of people in Team 1: "))
-    num_group2 = int(input(Fore.YELLOW + "Enter the number of people in Team 2: "))
+    while True:
+        try:
+            num_group1 = int(input(Fore.YELLOW + "\nEnter the number of people in Team 1: "))
+            num_group2 = int(input(Fore.YELLOW + "Enter the number of people in Team 2: "))
+            
+            if num_group1 > 0 and num_group2 > 0:
+                break  # Exit the loop if the input is valid
+            else:
+                print(Fore.RED + "Numbers must be greater than 0. Please try again.")
+        except ValueError:  # Handle non-integer input
+            print(Fore.RED + "Invalid input. Please enter a positive integer.")
     
     # Ask if the user wants the traitor to be manually set(predetermined)
-    predetermined_choice = input(Fore.GREEN + "\nDo you want to manually assign a player to be the traitor? (only one player for now) (y/n): ").strip().lower()
-    if (predetermined_choice == 'y') : 
+    while True:
+        predetermined_choice = input(Fore.GREEN + "\nDo you want to manually assign a player to be the traitor? (only one player for now) (y/n): ").strip().lower()
+        if (yn_check(predetermined_choice)): break
+
+    traitor_name = 'default'
+    if predetermined_choice == 'y':
         predetermined = True 
         print(Fore.RED + "Your traitor name must be in the email group!! Nonexisted name will cause the program to terminate!!")
-        traitor_name = input(Fore.YELLOW + "Your predetermined traitor name is: ").strip().upper()
+        
+        # Get user input for the traitor name
+        while True:
+            traitor_name = input(Fore.YELLOW + "Your predetermined traitor name is: ").strip().upper()
+            
+            # Check if the input is not empty
+            if traitor_name:
+                break
+            else:
+                print(Fore.RED + "Invalid input. Name cannot be empty.")
+        
         print(Fore.RED + "All set. Attention: The designated traitor must be the first person in the team to be assigned a traitor role with greater possibility.")
     else:
-        predetermined = False 
+        predetermined = False
 
     # Ask for names of people in each group
     available_names = [name for name in emails if name != 'default']
@@ -316,14 +346,54 @@ def get_user_input():
     num_traitors_group2 = int(input(Fore.YELLOW + f"Enter the number of traitors in Team 2 (0 to {num_group2}): "))
 
     # Ask if the user wants random positions
-    random_positions_choice = input(Fore.GREEN + "\nDo you also want to assign positions? (y/n): ").strip().lower()
+    while True:
+        random_positions_choice = input(Fore.GREEN + "\nDo you also want to assign positions? (y/n): ").strip().lower()
+        if (yn_check(random_positions_choice)): break
     random_positions = True if random_positions_choice == 'y' else False
+    # The default position list.  
+    positions = ['top', 'mid', 'jg', 'ad', 'sup',
+                'top', 'mid', 'jg', 'ad', 'sup',
+                'top', 'mid', 'jg', 'ad', 'sup',
+                'top', 'mid', 'jg', 'ad', 'sup',
+                'top', 'mid', 'jg', 'ad', 'sup']
+        
+    num_default_positions = 5  # The default number of unique positions
+    
     if random_positions:
+        # Asking user to customize positions
+        print(Fore.GREEN + "\nThe default positions are top, jg, mid, ad, sup.")
+        while True:
+            choice = input(Fore.GREEN + "Do you want to customize the positions? (y/n): ").strip().lower()
+            if (yn_check(choice)): break
+
+        # If user chooses to customize positions
+        if choice == 'y':
+            while True:
+                try:
+                    num_positions = int(input(Fore.GREEN + "\nHow many positions do you want to input? ").strip())
+                    if num_positions > 0:
+                        break
+                    else:
+                        print(Fore.RED + "Please input a positive integer.")
+                except ValueError:
+                    print(Fore.RED + "Invalid input. Please enter a number.")
+
+            new_positions = []
+            for i in range(num_positions):
+                position = input(Fore.GREEN + f"Enter position {i+1}: ").strip()
+                new_positions.append(position)
+
+            positions = new_positions * 5
+        else: 
+            num_positions = num_default_positions
+        
         # Ask if the user wants unique positions
-        unique_positions = input(Fore.GREEN + "\nDo you want positions to be unique? (y/n): ").strip().lower()
+        while True:
+            unique_positions = input(Fore.GREEN + "\nDo you want positions to be unique? (y/n): ").strip().lower()
+            if (yn_check(unique_positions)): break
         unique = True if unique_positions == 'y' else False
 
-    return group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name
+    return group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions,
 
 def select_names_from_list(num_people, available_names):
     group = []
@@ -353,13 +423,6 @@ if __name__ == "__main__":
     # List of roles and email addresses, create two roles lists for more flexibility on num of players
     roles1 = ['traitor', 'good', 'good', 'good']
     roles2 = ['traitor', 'good', 'good', 'good'] 
-    # pos list must be defined with unique positions at first row
-    # if change number of position types, must revise posTypeNum in function accordingly.
-    positions = ['top', 'mid', 'jg', 'ad', 'sup', 
-                 'top', 'mid', 'jg', 'ad', 'sup', 
-                 'top', 'mid', 'jg', 'ad', 'sup', 
-                 'top', 'mid', 'jg', 'ad', 'sup', 
-                 'top', 'mid', 'jg', 'ad', 'sup']
     # add player's email
     emails = {
         'CJQ': 'chenjiaqiapply@gmail.com',
@@ -374,13 +437,10 @@ if __name__ == "__main__":
         'XWHSB': 'XWHSB@rmalife.net',
         'default': 'not_exist'
     }
-    # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
-    group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name = get_user_input()
     
-    if (predetermined):
-        traitor_email = emails[traitor_name]
-    else:
-        traitor_email = emails['default']
+    # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
+    group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions = get_user_input()
+    traitor_email = emails[traitor_name]
 
     roles1 = create_roles_list(len(group1), num_traitors_group1)
     roles2 = create_roles_list(len(group2), num_traitors_group2)
@@ -401,7 +461,7 @@ if __name__ == "__main__":
     if random_positions:
         # for testing purpose
         # print('\nfinish sending roles without pos, now send rles with pos\n')
-        send_roles_with_positions(group1, group2, roles1, roles2, positions, 5, predetermined, traitor_email, favored_weight=10, uniqueness=unique)
+        send_roles_with_positions(group1, group2, roles1, roles2, positions, num_positions, predetermined, traitor_email, favored_weight=10, uniqueness=unique)
     else:
         # functions, comment the unused one when calling
         send_roles(group1, group2, roles1, roles2, predetermined, traitor_email, favored_weight=10)
