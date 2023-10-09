@@ -2,11 +2,11 @@ import smtplib
 import random
 from email.mime.text import MIMEText
 from colorama import init, Fore
+import time
+import sys 
 init(autoreset=True)
 
-# need to implement: 1. Improve the logic process of ensuring the designated traitor's name and must be first player in group.
-#                    2. Add corner case check for examine traitor names in which group of players, line 103 & 227
-#                    3. Add a csv or txt file to store email information
+# need to implement: Optional: allow user to predetermine more than one traitors
 
 def weighted_shuffle_first(orig_list, favored_element, favored_weight, num):
     """
@@ -340,7 +340,12 @@ def get_user_input():
     group1 = select_names_from_list(num_group1, available_names)
     print(Fore.GREEN + "\nSelect names for Group 2:")
     group2 = select_names_from_list(num_group2, available_names)
-
+    if (predetermined):
+        if (group1[0] != emails[traitor_name] and group2[0] != emails[traitor_name]):
+            print(Fore.RED + "The first player in either group does not match with your designated traitor name! Please restart.") 
+            time.sleep(5)
+            sys.exit()
+    
     # Ask for the number of traitors in each group
     num_traitors_group1 = int(input(Fore.YELLOW + f"\nEnter the number of traitors in Team 1 (0 to {num_group1}): "))
     num_traitors_group2 = int(input(Fore.YELLOW + f"Enter the number of traitors in Team 2 (0 to {num_group2}): "))
@@ -412,7 +417,6 @@ def select_names_from_list(num_people, available_names):
             # No need for the decrement operation; just let the loop repeat
     
     return group
-
 
 def create_roles_list(num_people, num_traitors):
     roles = ['traitor'] * num_traitors + ['good'] * (num_people - num_traitors)
