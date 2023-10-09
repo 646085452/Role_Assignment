@@ -141,14 +141,14 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
         msg['Subject'] = 'Your Role Information: ' + roles1[i]
         
         # for testing purpose
-        print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
+        # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
         
         # comment following area only if testing
-        # try:
-        #     server.sendmail(email_address, [group1[i]], msg.as_string())
-        #     print(f"Email sent to {group1[i]} successfully.")
-        # except Exception as e:
-        #     print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
+        try:
+            server.sendmail(email_address, [group1[i]], msg.as_string())
+            print(f"Email sent to {group1[i]} successfully.")
+        except Exception as e:
+            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
             
     for i in range(len(group2)):
         # Use pos_group2 for group2
@@ -158,14 +158,14 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
         msg['Subject'] = 'Your Role Information: ' + roles2[i]
 
         # for testing purpose
-        print(group2[i] + ': ' + roles2[i] + ", " + pos[i])
+        # print(group2[i] + ': ' + roles2[i] + ", " + pos[i])
         
         # comment following area only if testing
-        # try:
-        #     server.sendmail(email_address, [group2[i]], msg.as_string())
-        #     print(f"Email sent to {group2[i]} successfully.")
-        # except Exception as e:
-        #     print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+        try:
+            server.sendmail(email_address, [group2[i]], msg.as_string())
+            print(f"Email sent to {group2[i]} successfully.")
+        except Exception as e:
+            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
             
 def send_roles(group1, group2, roles1, roles2,
                predetermined = False, traitor_email = 'not_exist', favored_weight = 10):
@@ -246,14 +246,14 @@ def send_roles(group1, group2, roles1, roles2,
         msg['Subject'] = 'Your Role Information: ' + roles1[i]
         
         # for testing purpose
-        print(group1[i] + ': ' + roles1[i])
+        # print(group1[i] + ': ' + roles1[i])
         
         # comment following area only if testing
-        # try:
-        #     server.sendmail(email_address, [group1[i]], msg.as_string())
-        #     print(f"Email sent to {group1[i]} successfully.")
-        # except Exception as e:
-        #     print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
+        try:
+            server.sendmail(email_address, [group1[i]], msg.as_string())
+            print(f"Email sent to {group1[i]} successfully.")
+        except Exception as e:
+            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
             
     for i in range(len(group2)):
         msg = MIMEText(f'Your role is: {roles2[i]}\n Roles are either \"traitor\" or \"good\".')
@@ -262,14 +262,14 @@ def send_roles(group1, group2, roles1, roles2,
         msg['Subject'] = 'Your Role Information: ' + roles2[i]
         
         # for testing purpose
-        print(group2[i] + ': ' + roles2[i])
+        # print(group2[i] + ': ' + roles2[i])
 
         # comment following area only if testing
-        # try:
-        #     server.sendmail(email_address, [group2[i]], msg.as_string())
-        #     print(f"Email sent to {group2[i]} successfully.")
-        # except Exception as e:
-        #     print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+        try:
+            server.sendmail(email_address, [group2[i]], msg.as_string())
+            print(f"Email sent to {group2[i]} successfully.")
+        except Exception as e:
+            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
 
 def yn_check(input):
     if input in ['y', 'n']:
@@ -277,6 +277,78 @@ def yn_check(input):
     else:
         print(Fore.RED + "Invalid input. Please enter y or n.")
         return False
+
+def select_names_from_list(num_people, available_names):
+    group = []
+
+    i = 0
+    while i < num_people:
+        print(Fore.CYAN + f"Available names: {', '.join(available_names)}")
+        name = input(Fore.YELLOW + f"Select name for person {i+1}: ").strip().upper()
+        
+        if name in available_names:
+            group.append(emails[name])
+            available_names.remove(name)
+            i += 1  # Increment the counter only if the selection was valid
+        else:
+            print(Fore.RED + f"Name '{name}' is not in the available list. Please choose from the list.")
+            # No need for the decrement operation; just let the loop repeat
+    
+    return group
+
+def modify_positions_list(positions):
+    while True:
+        print(Fore.CYAN + "\nCurrent positions: " + ", ".join(positions))
+        print(Fore.YELLOW + "\nOptions:")
+        print("1. Add a position")
+        print("2. Remove a position")
+        print("3. Exit")
+        
+        choice = input(Fore.GREEN + "\nEnter your choice (1/2/3): ")
+        
+        if choice == "1":
+            new_position = input(Fore.YELLOW + "\nEnter the name of the position to add: ").strip()
+            if new_position in positions:
+                print(Fore.RED + f"Position '{new_position}' already exists!")
+            else:
+                positions.append(new_position)
+                print(Fore.GREEN + f"Position '{new_position}' added successfully!")
+                
+        elif choice == "2":
+            remove_position = input(Fore.YELLOW + "\nEnter the name of the position to remove: ").strip()
+            if remove_position not in positions:
+                print(Fore.RED + f"Position '{remove_position}' doesn't exist!")
+            else:
+                positions.remove(remove_position)
+                print(Fore.GREEN + f"Position '{remove_position}' removed successfully!")
+                
+        elif choice == "3":
+            break
+        else:
+            print(Fore.RED + "Invalid choice. Please select 1, 2, or 3.")
+    
+    return positions
+
+def create_roles_list(num_people, num_traitors):
+    roles = ['traitor'] * num_traitors + ['good'] * (num_people - num_traitors)
+    random.shuffle(roles)
+    return roles
+
+def load_emails_from_file(filename):
+    emails = {}
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            for line in file.readlines():
+                name, email = line.strip().split(',')
+                emails[name] = email
+    else:
+        print(Fore.RED + f"'{filename}' does not exist. Starting with an empty email list.")
+    return emails
+
+def save_emails_to_file(filename, emails):
+    with open(filename, 'w') as file:
+        for name, email in emails.items():
+            file.write(f"{name},{email}\n")
 
 def get_user_input():
     # Display the current list of names and emails
@@ -413,90 +485,12 @@ def get_user_input():
 
     return group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions,
 
-
-def select_names_from_list(num_people, available_names):
-    group = []
-
-    i = 0
-    while i < num_people:
-        print(Fore.CYAN + f"Available names: {', '.join(available_names)}")
-        name = input(Fore.YELLOW + f"Select name for person {i+1}: ").strip().upper()
-        
-        if name in available_names:
-            group.append(emails[name])
-            available_names.remove(name)
-            i += 1  # Increment the counter only if the selection was valid
-        else:
-            print(Fore.RED + f"Name '{name}' is not in the available list. Please choose from the list.")
-            # No need for the decrement operation; just let the loop repeat
-    
-    return group
-
-def modify_positions_list(positions):
-    while True:
-        print(Fore.CYAN + "\nCurrent positions: " + ", ".join(positions))
-        print(Fore.YELLOW + "\nOptions:")
-        print("1. Add a position")
-        print("2. Remove a position")
-        print("3. Exit")
-        
-        choice = input(Fore.GREEN + "\nEnter your choice (1/2/3): ")
-        
-        if choice == "1":
-            new_position = input(Fore.YELLOW + "\nEnter the name of the position to add: ").strip()
-            if new_position in positions:
-                print(Fore.RED + f"Position '{new_position}' already exists!")
-            else:
-                positions.append(new_position)
-                print(Fore.GREEN + f"Position '{new_position}' added successfully!")
-                
-        elif choice == "2":
-            remove_position = input(Fore.YELLOW + "\nEnter the name of the position to remove: ").strip()
-            if remove_position not in positions:
-                print(Fore.RED + f"Position '{remove_position}' doesn't exist!")
-            else:
-                positions.remove(remove_position)
-                print(Fore.GREEN + f"Position '{remove_position}' removed successfully!")
-                
-        elif choice == "3":
-            break
-        else:
-            print(Fore.RED + "Invalid choice. Please select 1, 2, or 3.")
-    
-    return positions
- 
-
-def create_roles_list(num_people, num_traitors):
-    roles = ['traitor'] * num_traitors + ['good'] * (num_people - num_traitors)
-    random.shuffle(roles)
-    return roles
-
-def load_emails_from_file(filename):
-    emails = {}
-    if os.path.exists(filename):
-        with open(filename, 'r') as file:
-            for line in file.readlines():
-                name, email = line.strip().split(',')
-                emails[name] = email
-    else:
-        print(Fore.RED + f"'{filename}' does not exist. Starting with an empty email list.")
-    return emails
-
-def save_emails_to_file(filename, emails):
-    with open(filename, 'w') as file:
-        for name, email in emails.items():
-            file.write(f"{name},{email}\n")
-
-
 if __name__ == "__main__":
     # List of roles and email addresses, create two roles lists for more flexibility on num of players
     roles1 = ['traitor', 'good', 'good', 'good']
     roles2 = ['traitor', 'good', 'good', 'good'] 
     # add player's email
     emails = load_emails_from_file('emails.txt')
-
-    # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
-    group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name = get_user_input()
     
     # arbitrarily assign groups, the predetermined traitor's email must come at the first element.
     group1, group2, num_traitors_group1, num_traitors_group2, random_positions, unique, predetermined, traitor_name, positions, num_positions = get_user_input()
