@@ -435,6 +435,7 @@ def get_user_input():
     num_traitors_group2 = int(input(Fore.YELLOW + f"Enter the number of traitors in Team 2 (0 to {num_group2}): "))
 
     # Ask if the user wants random positions
+    unique = False
     while True:
         random_positions_choice = input(Fore.GREEN + "\nDo you also want to assign positions? (y/n): ").strip().lower()
         if (yn_check(random_positions_choice)): break
