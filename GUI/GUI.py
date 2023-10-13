@@ -440,10 +440,12 @@ def main_gui():
     ttk.Label(traitor_frame, text="Traitors Team 1:").pack(side="left")
     traitor_team1_spin = ttk.Spinbox(traitor_frame, from_=0, to=5)
     traitor_team1_spin.pack(side="left", padx=10)
+    traitor_team1_spin.set(1)
 
     ttk.Label(traitor_frame, text="Traitors Team 2:").pack(side="left")
     traitor_team2_spin = ttk.Spinbox(traitor_frame, from_=0, to=5)
     traitor_team2_spin.pack(side="left", padx=10)
+    traitor_team2_spin.set(1)
 
     # Randomized and unique position checkboxes
     position_frame = ttk.Frame(root)
