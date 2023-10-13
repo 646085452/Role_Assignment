@@ -37,8 +37,8 @@ def weighted_shuffle_first(orig_list, favored_element, favored_weight, num):
 
 # only call each function once during the execution, hence modifying the reference is acceptable
 # If the global vars 'group', 'role', 'pos' should remain the same, copy params to local vars in funcs.
-def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
-                              predetermined = False, traitor_email = 'not_exist', favored_weight = 10, uniqueness = True):
+def send_roles_with_positions(group1, group2, traitors_team1, traitors_team2, assaigned_traitor1, assaigned_traitor2, pos, posTypeNum,
+                              uniqueness = True):
     """
     Assign roles and positions to two groups and send email notifications.
 
@@ -87,35 +87,14 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
                                   predetermined=True, traitor_email='alice@email.com',
                                   favored_weight=5, uniqueness=True)
     """
+
+    roles1 = create_roles_list(len(group1)-assaigned_traitor1, traitors_team1-assaigned_traitor1)
+    roles2 = create_roles_list(len(group2)-assaigned_traitor2, traitors_team2-assaigned_traitor2)
+
     # condition check
-    if len(roles1) != len(group1) or len(roles2) != len(group2):
+    if len(roles1) != len(group1)-assaigned_traitor1 or len(roles2) != len(group2)-assaigned_traitor2:
         print("Number of players is not equal to number of roles")
         return
-    
-    # Shuffling the roles to assign them randomly
-    if (not predetermined):
-        print("Assigning not predetermined roles...")
-        random.shuffle(roles1)
-        random.shuffle(roles2)
-    else:
-        if (traitor_email == 'not_exist'):
-            print("The traitor_email parameter is not assigned!")
-            return
-        
-        print("Assigning predetermined roles...")
-        traitor1_num = roles1.count("traitor")
-        traitor2_num = roles2.count("traitor")
-        # we assume that traitor's name must be in either group1 or group2. No cornor case check
-        traitor_in_group1 = False
-        for email in group1:
-            if traitor_email == email:
-                traitor_in_group1 = True
-        if (traitor_in_group1):
-            weighted_shuffle_first(roles1, "traitor", favored_weight, traitor1_num)
-            random.shuffle(roles2)
-        else:
-            weighted_shuffle_first(roles2, "traitor", favored_weight, traitor2_num)
-            random.shuffle(roles1)
             
     # determine if positions are unique 
     if len(pos) < len(group1) or len(pos) < len(group2):
@@ -134,44 +113,62 @@ def send_roles_with_positions(group1, group2, roles1, roles2, pos, posTypeNum,
     # Shuffle positions for group2
     pos_group2 = pos.copy()
     random.shuffle(pos_group2)
-    
+
     # Sending email to each person with their role
-    for i in range(len(group1)):
-        # Use pos_group1 for group1
-        msg = MIMEText(f'Your role is: {roles1[i]}, your position is {pos_group1[i]}\n Roles are either \"traitor\" or \"good\".')
-        msg['From'] = email_address
-        msg['To'] = group1[i]
-        msg['Subject'] = 'Your Role Information: ' + roles1[i]
-        
+    random.shuffle(roles1)
+    random.shuffle(roles2)
+
+    i = 0
+    n = 0
+    for email in group1:
+        if group1[email] == 1:
+            msg = MIMEText(f'Your role is: traitor, your position is {pos_group1[i]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: traitor'
+        else: 
+            msg = MIMEText(f'Your role is: {roles1[n]}, your position is {pos_group1[i]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: ' + roles1[n]
+            n += 1
         # for testing purpose
         # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
         
         # comment following area only if testing
         try:
-            server.sendmail(email_address, [group1[i]], msg.as_string())
-            print(f"Email sent to {group1[i]} successfully.")
+            server.sendmail(email_address, [email], msg.as_string())
+            print(f"Email sent to {email} successfully.")
+            i += 1
         except Exception as e:
-            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
-            
-    for i in range(len(group2)):
-        # Use pos_group2 for group2
-        msg = MIMEText(f'Your role is: {roles2[i]}, your position is {pos_group2[i]}\n Roles are either \"traitor\" or \"good\".')
-        msg['From'] = email_address
-        msg['To'] = group2[i]
-        msg['Subject'] = 'Your Role Information: ' + roles2[i]
-
+            print(f"Failed to send email to {email}. Error: {str(e)}")
+        
+    i = 0
+    n = 0
+    for email in group2:
+        if group2[email] == 1:
+            msg = MIMEText(f'Your role is: traitor, your position is {pos_group2[i]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: traitor'
+        else: 
+            msg = MIMEText(f'Your role is: {roles2[n]}, your position is {pos_group2[i]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: ' + roles2[n]
+            n += 1
         # for testing purpose
-        # print(group2[i] + ': ' + roles2[i] + ", " + pos[i])
+        # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
         
         # comment following area only if testing
         try:
-            server.sendmail(email_address, [group2[i]], msg.as_string())
-            print(f"Email sent to {group2[i]} successfully.")
+            server.sendmail(email_address, [email], msg.as_string())
+            print(f"Email sent to {email} successfully.")
+            i += 1
         except Exception as e:
-            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+            print(f"Failed to send email to {email}. Error: {str(e)}")
             
-def send_roles(group1, group2, roles1, roles2,
-               predetermined = False, traitor_email = 'not_exist', favored_weight = 10):
+def send_roles(group1, group2, traitors_team1, traitors_team2, assaigned_traitor1, assaigned_traitor2):
     """
     Assign roles to two groups and send email notifications.
 
@@ -211,68 +208,68 @@ def send_roles(group1, group2, roles1, roles2,
     >>> send_roles_with_positions(group1, group2, roles1, roles2, predetermined=True, 
                                     traitor_email='alice@email.com', favored_weight=5)
     """
+    roles1 = create_roles_list(len(group1)-assaigned_traitor1, traitors_team1-assaigned_traitor1)
+    roles2 = create_roles_list(len(group2)-assaigned_traitor2, traitors_team2-assaigned_traitor2)
+
     # condition check
-    if len(roles1) != len(group1) or len(roles2) != len(group2):
+    if len(roles1) != len(group1)-assaigned_traitor1 or len(roles2) != len(group2)-assaigned_traitor2:
         print("Number of players is not equal to number of roles")
         return
-        
-    # Shuffling the roles to assign them randomly
-    if (not predetermined):
-        print("Assigning not predetermined roles...")
-        random.shuffle(roles1)
-        random.shuffle(roles2)
-    else:
-        if (traitor_email == 'not_exist'):
-            print("The traitor_email parameter is not assigned!")
-            return
-        
-        print("Assigning predetermined roles...")
-        traitor1_num = roles1.count("traitor")
-        traitor2_num = roles2.count("traitor")
-        # we assume that traitor's name must be in either group1 or group2. No cornor case check
-        traitor_in_group1 = False
-        for email in group1:
-            if traitor_email == email:
-                traitor_in_group1 = True
-        if (traitor_in_group1):
-            weighted_shuffle_first(roles1, "traitor", favored_weight, traitor1_num)
-            random.shuffle(roles2)
-        else:
-            weighted_shuffle_first(roles2, "traitor", favored_weight, traitor2_num)
-            random.shuffle(roles1)
     
     # Sending email to each person with their role
-    for i in range(len(group1)):
-        msg = MIMEText(f'Your role is: {roles1[i]}\n Roles are either \"traitor\" or \"good\".')
-        msg['From'] = email_address
-        msg['To'] = group1[i]
-        msg['Subject'] = 'Your Role Information: ' + roles1[i]
-        
-        # for testing purpose
-        # print(group1[i] + ': ' + roles1[i])
-        
-        # comment following area only if testing
-        try:
-            server.sendmail(email_address, [group1[i]], msg.as_string())
-            print(f"Email sent to {group1[i]} successfully.")
-        except Exception as e:
-            print(f"Failed to send email to {group1[i]}. Error: {str(e)}")
-            
-    for i in range(len(group2)):
-        msg = MIMEText(f'Your role is: {roles2[i]}\n Roles are either \"traitor\" or \"good\".')
-        msg['From'] = email_address
-        msg['To'] = group2[i]
-        msg['Subject'] = 'Your Role Information: ' + roles2[i]
-        
-        # for testing purpose
-        # print(group2[i] + ': ' + roles2[i])
+    random.shuffle(roles1)
+    random.shuffle(roles2)
 
+    # Sending email to each person with their role
+    i = 0
+    n = 0
+    for email in group1:
+        if group1[email] == 1:
+            msg = MIMEText(f'Your role is: traitor\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: traitor'
+        else: 
+            msg = MIMEText(f'Your role is: {roles1[n]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: ' + roles1[n]
+            n += 1
+        # for testing purpose
+        # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
+        
         # comment following area only if testing
         try:
-            server.sendmail(email_address, [group2[i]], msg.as_string())
-            print(f"Email sent to {group2[i]} successfully.")
+            server.sendmail(email_address, [email], msg.as_string())
+            print(f"Email sent to {email} successfully.")
+            i += 1
         except Exception as e:
-            print(f"Failed to send email to {group2[i]}. Error: {str(e)}")
+            print(f"Failed to send email to {email}. Error: {str(e)}")
+        
+    i = 0
+    n = 0
+    for email in group2:
+        if group2[email] == 1:
+            msg = MIMEText(f'Your role is: traitor\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: traitor'
+        else: 
+            msg = MIMEText(f'Your role is: {roles2[n]}\n')
+            msg['From'] = email_address
+            msg['To'] = email
+            msg['Subject'] = 'Your Role Information: ' + roles2[n]
+            n += 1
+        # for testing purpose
+        # print(group1[i] + ': ' + roles1[i] + ", " + pos[i])
+        
+        # comment following area only if testing
+        try:
+            server.sendmail(email_address, [email], msg.as_string())
+            print(f"Email sent to {email} successfully.")
+            i += 1
+        except Exception as e:
+            print(f"Failed to send email to {email}. Error: {str(e)}")
 
 def yn_check(input):
     if input in ['y', 'n']:
@@ -349,15 +346,22 @@ def load_emails_from_file(filename):
     return emails
 
 def send_teams(team_selections, traitor_team1_spin, traitor_team2_spin, randomized_var, unique_var):
-    team1 = []
-    team2 = []
+    team1 = {}
+    team2 = {}
     
     # Loop through the team_selections to gather selected teams
-    for name, team1_var, team2_var in team_selections:
+    assaigned_traitor1 = 0
+    assaigned_traitor2 = 0
+    for name, team1_var, team2_var, traitor in team_selections:
         if team1_var.get() == 1:
-            team1.append(emails[name])
+            team1[emails[name]] = traitor.get()
+            if traitor.get() == 1:
+                assaigned_traitor1 += 1
         elif team2_var.get() == 1:
-            team2.append(emails[name])
+            team2[emails[name]] = traitor.get()
+            if traitor.get() == 1:
+                assaigned_traitor2 += 1
+        
 
     # Get number of traitors from spinboxes
     try:
@@ -381,19 +385,18 @@ def send_teams(team_selections, traitor_team1_spin, traitor_team2_spin, randomiz
     print(f"Team 2 Players: {team2}")
     print(f"Traitors in Team 1: {traitors_team1}")
     print(f"Traitors in Team 2: {traitors_team2}")
+    print(f"Team 1 Assigned Traitors: {assaigned_traitor1}")
+    print(f"Team 2 Assigned Traitors: {assaigned_traitor2}")
     print(f"Randomize Position: {randomized_position}")
     print(f"Unique Position: {unique_position}")
-
-    roles1 = create_roles_list(len(team1), traitors_team1)
-    roles2 = create_roles_list(len(team2), traitors_team2)
 
     if randomized_position:
         # for testing purpose
         # print('\nfinish sending roles without pos, now send rles with pos\n')
-        send_roles_with_positions(team1, team2, roles1, roles2, positions, 5, False, 'not_exist', favored_weight=10, uniqueness=unique_position)
+        send_roles_with_positions(team1, team2, traitors_team1, traitors_team2, assaigned_traitor1, assaigned_traitor2, positions, 5, uniqueness=unique_position)
     else:
         # functions, comment the unused one when calling
-        send_roles(team1, team2, roles1, roles2, False, 'not_exist', favored_weight=10)
+        send_roles(team1, team2, traitors_team1, traitors_team2, assaigned_traitor1, assaigned_traitor2)
     messagebox.showinfo("Info", "Roles sent successfully!")
     
 
@@ -415,6 +418,7 @@ def main_gui():
             
             team1_var = tk.IntVar()
             team2_var = tk.IntVar()
+            traitor_var = tk.IntVar()
             
             team1_check = ttk.Checkbutton(frame, text="Team 1", variable=team1_var, 
                                         command=lambda v1=team1_var, v2=team2_var: v2.set(0))
@@ -423,8 +427,11 @@ def main_gui():
             team2_check = ttk.Checkbutton(frame, text="Team 2", variable=team2_var,
                                         command=lambda v1=team1_var, v2=team2_var: v1.set(0))
             team2_check.pack(side="left", padx=10)
-            
-            team_selections.append((name, team1_var, team2_var))
+
+            traitor_check = ttk.Checkbutton(frame, text="Traitor", variable=traitor_var)  # New traitor checkbox
+            traitor_check.pack(side="left", padx=10)
+
+            team_selections.append((name, team1_var, team2_var, traitor_var))
 
     # Number of traitors for both teams
     traitor_frame = ttk.Frame(root)
